@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.strawhat.shiro.dao.UserDao">
+    <insert id="insertUser" parameterType="com.strawhat.shiro.pojo.User">
+        insert into t_user(account,uname,password,age,sex,dept,lookpassword,salt)
+        VALUES(#{account},#{uname},#{password},#{age},#{sex},#{dept},#{lookpassword},#{salt})
+    </insert>
+    <delete id="deleteUser">
+        delete from t_user where account=#{account}
+    </delete>
+    <update id="updateUser" parameterType="com.strawhat.shiro.pojo.User">
+        update t_user set account=#{account},uname=#{uname},password=#{password},age=#{age},sex=#{sex},dept=#{dept}
+        where account=#{account}
+    </update>
+
+    <select id="queryUser" resultType="com.strawhat.shiro.pojo.User">
+        select * from t_user where account=#{account}
+    </select>
+    <select id="querUsername" resultType="java.lang.String">
+        select uname from t_user where account=#{account}
+    </select>
+    <select id="selectAllUser" resultType="com.strawhat.shiro.pojo.User">
+        select * from t_user
+    </select>
+
+</mapper>

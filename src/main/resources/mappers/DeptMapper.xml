@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.strawhat.shiro.dao.DeptDao">
+    <insert id="insertDept">
+        insert into t_dept(deptno,deptname,remark) values(#{deptno},#{deptname},#{remark})
+    </insert>
+    <update id="updateDept">
+        update t_dept set deptname=#{deptname},remark=#{remark}
+    </update>
+    <delete id="deleteDept">
+        delete from t_dept where deptno=#{deptno}
+    </delete>
+
+    <select id="selectAllDept" resultType="com.strawhat.shiro.pojo.Dept">
+        select * from t_dept
+    </select>
+    <select id="selectDept" resultType="com.strawhat.shiro.pojo.Dept">
+        select * from t_dept where deptno=#{deptno}
+    </select>
+
+</mapper>

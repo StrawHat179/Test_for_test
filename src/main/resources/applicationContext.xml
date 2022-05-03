@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--扫描包配置-->
+    <context:component-scan base-package="com.strawhat.shiro">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!--配置数据源-->
+    <context:property-placeholder location="classpath:db.properties"/>
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driver}"></property>
+        <property name="jdbcUrl" value="${jdbc.url}"></property>
+        <property name="user" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+    </bean>
+
+    <!--spring整合mybatis-->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+        <property name="mapperLocations" value="classpath:mappers/*.xml"></property>
+    </bean>
+
+    <!--给我们dao层的接口添加实现类-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.strawhat.shiro.dao"></property>
+    </bean>
+
+    <!--Spring集成shiro-->
+    <!--1,realm注入容器
+        2、配置安全管理器（生成安全管理器实例，将我们的realm数据放进来）
+        3、配置shiroFilter
+    -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="myRealm"></property>
+        <property name="rememberMeManager" ref="rememberManager"></property>
+    </bean>
+
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!--注入核心对象-->
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="/templates/login.html"/>
+        <property name="unauthorizedUrl" value="/error"/>
+        <!--过滤器链-->
+        <property name="filterChainDefinitions">
+            <value>
+                /index = anon
+                /login = anon
+                /static/js/** = anon
+                /static/css/** = anon
+                /static/lib/** = anon
+                /static/images/** = anon
+                /static/fonts/** = anon
+                /user/queryUserByAccount/** = anon
+                <!--roles["admin","user"]-->
+<!--                /index1= authc,roles["admin"]-->
+<!--                /index=authc,roles["employee"]-->
+<!--                /user/addUser = authc,perms["/addUser"]-->
+                /logout=logout
+                <!--记住我之后的过滤器-->
+                /user/remember = user
+                /** = authc
+            </value>
+        </property>
+        <!--注入其他的过滤器-->
+        <property name="filters">
+            <map>
+                <entry key="logout" value-ref="logoutFilter" />
+            </map>
+        </property>
+    </bean>
+    <!--配置登出后跳转地址-->
+    <bean id="logoutFilter" class="org.apache.shiro.web.filter.authc.LogoutFilter">
+        <property name="redirectUrl" value="/login"/>
+    </bean>
+
+
+    <!--配置rememberMe-->
+    <bean id="rememberCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <property name="name" value="rememberMe"></property>
+        <property name="httpOnly" value="true"></property>
+        <property name="maxAge" value="36000"></property>
+    </bean>
+
+    <!--配置记住我的管理器、将配置的remember注入容器-->
+    <bean id="rememberManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+        <property name="cookie" ref="rememberCookie"></property>
+    </bean>
+
+    <!--将记住我管理器注入到 SecurityManager 中-->
+
+
+</beans>
